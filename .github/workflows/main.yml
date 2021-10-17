@@ -14,7 +14,7 @@ jobs:
 
       - name: Tests
         run: |
-          sudo apt-get install -y libghc-criterion-dev
+          ./deps/scripts/install_criterion.sh
           sudo apt-get install -y gcovr
           make tests_run
           make coverage
