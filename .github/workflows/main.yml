@@ -1,0 +1,20 @@
+name: build
+on:
+  push:
+    branches: [ master, dev, workflow/ci ]
+  pull_request:
+    branches: [ master, dev, workflow/ci ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Tests
+        run: |
+          ./deps/scripts/install_criterion.sh
+          sudo apt-get install -y gcovr
+          make tests_run
+          make coverage
