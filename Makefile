@@ -113,7 +113,7 @@ NAME_TESTS				=	unit_tests
 # Tests binary flags #
 ######################
 
-TESTSFLAGS				=	--verbose
+TESTS_FLAGS				=	--verbose
 
 ######################
 # Tests source files #
@@ -134,7 +134,7 @@ tests_run:	LDLIBS += -lcriterion
 tests_run:	$(OBJ_TESTS_FILES)
 	for regex in $(COVERAGE_DUMPS_REGEX); do find -name "*$$regex" -type f -delete; done;
 	$(CC) -o $(NAME_TESTS) $(SRC_PROJECT_FILES) $(OBJ_TESTS_FILES) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $(LDLIBS)
-	./$(NAME_TESTS) $(TESTSFLAGS)
+	./$(NAME_TESTS) $(TESTS_FLAGS)
 	$(RM) $(NAME_TESTS)
 .PHONY:		tests_run
 .SILENT:	tests_run
