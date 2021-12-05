@@ -21,7 +21,7 @@ NAME_DYNAMIC_LIB	=	libreaderelf.so
 # Project compilation flags #
 #############################
 
-override CFLAGS		+=	-W -Wall -Wextra -Wshadow -Werror
+override CFLAGS		+=	-W -Wall -Wextra -Wshadow -Wpedantic -Werror
 
 INCLUDE_PROJECT_DIR	=	./include/
 
