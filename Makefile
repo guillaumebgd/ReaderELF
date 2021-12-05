@@ -63,11 +63,14 @@ $(NAME_STATIC_LIB):		$(OBJ_PROJECT_FILES)
 	ar rc $(NAME_STATIC_LIB) $(OBJ_PROJECT_FILES)
 .SILENT:	$(NAME_STATIC_LIB)
 
+dynamic:	CFLAGS += -fPIC
+dynamic:	LDFLAGS += -shared
 dynamic:	$(NAME_DYNAMIC_LIB)
 .PHONY:		dynamic
 
 $(NAME_DYNAMIC_LIB):	$(OBJ_PROJECT_FILES)
 	echo "Building dynamic library ($@)..."
+	$(LD) -o $(NAME_DYNAMIC_LIB) $(OBJ_PROJECT_FILES) $(LDFLAGS) $(LDLIBS)
 .SILENT:	$(NAME_DYNAMIC_LIB)
 
 clean:
@@ -76,7 +79,7 @@ clean:
 	echo "Removing tests object files..."
 	$(RM) $(OBJ_TESTS_FILES)
 	echo "Removing coverage dump files..."
-	for regex in $(COVERAGE_DUMPS_REGEX); do find -name $$regex -delete; done;
+	for regex in $(COVERAGE_DUMPS_REGEX); do find -name "*$$regex" -type f -delete; done;
 	echo "Removing tests executable..."
 	$(RM) $(NAME_TESTS)
 .PHONY:		clean
@@ -101,8 +104,8 @@ re:			fclean all
 # Tests output files #
 ######################
 
-COVERAGE_DUMPS_REGEX	=	"*.gcda"	\
-							"*.gcno"
+COVERAGE_DUMPS_REGEX	=	.gcda	\
+							.gcno
 
 NAME_TESTS				=	unit_tests
 
@@ -129,7 +132,7 @@ OBJ_TESTS_FILES	=	$(SRC_TESTS_FILES:.c=.o)
 tests_run:	CFLAGS += --coverage
 tests_run:	LDLIBS += -lcriterion
 tests_run:	$(OBJ_TESTS_FILES)
-	for regex in $(COVERAGE_DUMPS_REGEX); do find -name $$regex -delete; done;
+	for regex in $(COVERAGE_DUMPS_REGEX); do find -name "*$$regex" -type f -delete; done;
 	$(CC) -o $(NAME_TESTS) $(SRC_PROJECT_FILES) $(OBJ_TESTS_FILES) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $(LDLIBS)
 	./$(NAME_TESTS) $(TESTSFLAGS)
 	$(RM) $(NAME_TESTS)
