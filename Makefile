@@ -21,7 +21,7 @@ NAME_DYNAMIC_LIB	=	libreaderelf.so
 # Project compilation flags #
 #############################
 
-override CFLAGS		+=	-W -Wall -Wextra -Wshadow -Werror
+override CFLAGS		+=	-W -Wall -Wextra -Wshadow -Wpedantic -Werror
 
 INCLUDE_PROJECT_DIR	=	./include/
 
@@ -37,7 +37,9 @@ override LDLIBS		+=
 
 SRC_PROJECT_DIR		=	./src/
 
-SRC_PROJECT_FILES	=	$(addprefix $(SRC_PROJECT_DIR), readerelf.c)
+SRC_PROJECT_FILES	=	$(addprefix $(SRC_PROJECT_DIR), relf_create.c)	\
+						$(addprefix $(SRC_PROJECT_DIR), relf_destroy.c)	\
+						$(addprefix $(SRC_PROJECT_DIR), relf_open.c)
 
 OBJ_PROJECT_FILES	=	$(SRC_PROJECT_FILES:.c=.o)
 
@@ -52,7 +54,7 @@ OBJ_PROJECT_FILES	=	$(SRC_PROJECT_FILES:.c=.o)
 
 #################
 
-all:		$(NAME_STATIC_LIB)
+all:		static
 .PHONY:		all
 
 static:		$(NAME_STATIC_LIB)
@@ -63,11 +65,14 @@ $(NAME_STATIC_LIB):		$(OBJ_PROJECT_FILES)
 	ar rc $(NAME_STATIC_LIB) $(OBJ_PROJECT_FILES)
 .SILENT:	$(NAME_STATIC_LIB)
 
+dynamic:	CFLAGS += -fPIC
+dynamic:	LDFLAGS += -shared
 dynamic:	$(NAME_DYNAMIC_LIB)
 .PHONY:		dynamic
 
 $(NAME_DYNAMIC_LIB):	$(OBJ_PROJECT_FILES)
 	echo "Building dynamic library ($@)..."
+	$(LD) -o $(NAME_DYNAMIC_LIB) $(OBJ_PROJECT_FILES) $(LDFLAGS) $(LDLIBS)
 .SILENT:	$(NAME_DYNAMIC_LIB)
 
 clean:
@@ -76,9 +81,10 @@ clean:
 	echo "Removing tests object files..."
 	$(RM) $(OBJ_TESTS_FILES)
 	echo "Removing coverage dump files..."
-	for regex in $(COVERAGE_DUMPS_REGEX); do find -name $$regex -delete; done;
+	for regex in $(COVERAGE_DUMPS_REGEX); do find -name "*$$regex" -type f -delete; done;
 	echo "Removing tests executable..."
 	$(RM) $(NAME_TESTS)
+	for binsubdir in $(BIN_SUBDIRS); do make $@ -C $$binsubdir ; done;
 .PHONY:		clean
 .SILENT:	clean
 
@@ -86,6 +92,7 @@ fclean:		clean
 	echo "Removing libraries output files..."
 	$(RM) $(NAME_STATIC_LIB)
 	$(RM) $(NAME_DYNAMIC_LIB)
+	for binsubdir in $(BIN_SUBDIRS); do make $@ -C $$binsubdir ; done;
 .PHONY:		fclean
 .SILENT:	fclean
 .IGNORE:	fclean
@@ -101,8 +108,8 @@ re:			fclean all
 # Tests output files #
 ######################
 
-COVERAGE_DUMPS_REGEX	=	"*.gcda"	\
-							"*.gcno"
+COVERAGE_DUMPS_REGEX	=	.gcda	\
+							.gcno
 
 NAME_TESTS				=	unit_tests
 
@@ -110,7 +117,7 @@ NAME_TESTS				=	unit_tests
 # Tests binary flags #
 ######################
 
-TESTSFLAGS				=	--verbose
+TESTS_FLAGS				=	--verbose
 
 ######################
 # Tests source files #
@@ -118,9 +125,18 @@ TESTSFLAGS				=	--verbose
 
 SRC_TESTS_DIR	=	./tests/
 
-SRC_TESTS_FILES	=	$(addprefix $(SRC_TESTS_DIR), readerelf.c)
+SRC_TESTS_FILES	=	$(addprefix $(SRC_TESTS_DIR), relf_create.c)	\
+					$(addprefix $(SRC_TESTS_DIR), relf_open.c)
 
 OBJ_TESTS_FILES	=	$(SRC_TESTS_FILES:.c=.o)
+
+#######################
+# Binaries Test files #
+#######################
+
+BIN_DIR			=	./bin/
+
+BIN_SUBDIRS		=	$(addprefix $(BIN_DIR), asm/)
 
 ##########################
 # Tests / Coverage rules #
@@ -129,9 +145,10 @@ OBJ_TESTS_FILES	=	$(SRC_TESTS_FILES:.c=.o)
 tests_run:	CFLAGS += --coverage
 tests_run:	LDLIBS += -lcriterion
 tests_run:	$(OBJ_TESTS_FILES)
-	for regex in $(COVERAGE_DUMPS_REGEX); do find -name $$regex -delete; done;
+	for binsubdir in $(BIN_SUBDIRS); do make -C $$binsubdir ; done;
+	for regex in $(COVERAGE_DUMPS_REGEX); do find -name "*$$regex" -type f -delete; done;
 	$(CC) -o $(NAME_TESTS) $(SRC_PROJECT_FILES) $(OBJ_TESTS_FILES) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $(LDLIBS)
-	./$(NAME_TESTS) $(TESTSFLAGS)
+	./$(NAME_TESTS) $(TESTS_FLAGS)
 	$(RM) $(NAME_TESTS)
 .PHONY:		tests_run
 .SILENT:	tests_run
