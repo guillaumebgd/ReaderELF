@@ -13,6 +13,7 @@ Test(relf_open, basic_relf_open)
     char const *filepath = "./bin/asm/_strcase_cmp";
     relf_t *relf = relf_create();
 
-    relf_open(relf, filepath);
+    cr_assert(relf_open(relf, filepath) == 0);
+    relf_show(relf);
     relf_destroy(relf);
 }

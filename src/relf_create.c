@@ -10,6 +10,8 @@
 
 static void initialize_relf_fields(relf_t *relf)
 {
+    relf->fd = -1;
+    relf->file_length = 0;
     relf->header = NULL;
 }
 

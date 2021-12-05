@@ -39,7 +39,8 @@ SRC_PROJECT_DIR		=	./src/
 
 SRC_PROJECT_FILES	=	$(addprefix $(SRC_PROJECT_DIR), relf_create.c)	\
 						$(addprefix $(SRC_PROJECT_DIR), relf_destroy.c)	\
-						$(addprefix $(SRC_PROJECT_DIR), relf_open.c)
+						$(addprefix $(SRC_PROJECT_DIR), relf_open.c)	\
+						$(addprefix $(SRC_PROJECT_DIR), relf_show.c)
 
 OBJ_PROJECT_FILES	=	$(SRC_PROJECT_FILES:.c=.o)
 
