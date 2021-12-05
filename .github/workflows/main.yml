@@ -1,13 +1,29 @@
 name: build
 on:
   push:
-    branches: [ master, dev, workflow/ci ]
+    branches: [ main, dev, workflow/ci ]
   pull_request:
-    branches: [ master, dev, workflow/ci ]
+    branches: [ main, dev, workflow/ci ]
   workflow_dispatch:
 
 jobs:
-  build:
+  build-static:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build static library
+        run: make static
+
+  build-dynamic:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build dynamic library
+        run: make dynamic
+
+  tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
