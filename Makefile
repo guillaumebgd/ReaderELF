@@ -37,7 +37,9 @@ override LDLIBS		+=
 
 SRC_PROJECT_DIR		=	./src/
 
-SRC_PROJECT_FILES	=	$(addprefix $(SRC_PROJECT_DIR), readerelf.c)
+SRC_PROJECT_FILES	=	$(addprefix $(SRC_PROJECT_DIR), relf_create.c)	\
+						$(addprefix $(SRC_PROJECT_DIR), relf_destroy.c)	\
+						$(addprefix $(SRC_PROJECT_DIR), relf_open.c)
 
 OBJ_PROJECT_FILES	=	$(SRC_PROJECT_FILES:.c=.o)
 
@@ -52,7 +54,7 @@ OBJ_PROJECT_FILES	=	$(SRC_PROJECT_FILES:.c=.o)
 
 #################
 
-all:		$(NAME_STATIC_LIB)
+all:		static
 .PHONY:		all
 
 static:		$(NAME_STATIC_LIB)
@@ -82,6 +84,7 @@ clean:
 	for regex in $(COVERAGE_DUMPS_REGEX); do find -name "*$$regex" -type f -delete; done;
 	echo "Removing tests executable..."
 	$(RM) $(NAME_TESTS)
+	for binsubdir in $(BIN_SUBDIRS); do make $@ -C $$binsubdir ; done;
 .PHONY:		clean
 .SILENT:	clean
 
@@ -89,6 +92,7 @@ fclean:		clean
 	echo "Removing libraries output files..."
 	$(RM) $(NAME_STATIC_LIB)
 	$(RM) $(NAME_DYNAMIC_LIB)
+	for binsubdir in $(BIN_SUBDIRS); do make $@ -C $$binsubdir ; done;
 .PHONY:		fclean
 .SILENT:	fclean
 .IGNORE:	fclean
@@ -121,9 +125,18 @@ TESTS_FLAGS				=	--verbose
 
 SRC_TESTS_DIR	=	./tests/
 
-SRC_TESTS_FILES	=	$(addprefix $(SRC_TESTS_DIR), readerelf.c)
+SRC_TESTS_FILES	=	$(addprefix $(SRC_TESTS_DIR), relf_create.c)	\
+					$(addprefix $(SRC_TESTS_DIR), relf_open.c)
 
 OBJ_TESTS_FILES	=	$(SRC_TESTS_FILES:.c=.o)
+
+#######################
+# Binaries Test files #
+#######################
+
+BIN_DIR			=	./bin/
+
+BIN_SUBDIRS		=	$(addprefix $(BIN_DIR), asm/)
 
 ##########################
 # Tests / Coverage rules #
@@ -132,6 +145,7 @@ OBJ_TESTS_FILES	=	$(SRC_TESTS_FILES:.c=.o)
 tests_run:	CFLAGS += --coverage
 tests_run:	LDLIBS += -lcriterion
 tests_run:	$(OBJ_TESTS_FILES)
+	for binsubdir in $(BIN_SUBDIRS); do make -C $$binsubdir ; done;
 	for regex in $(COVERAGE_DUMPS_REGEX); do find -name "*$$regex" -type f -delete; done;
 	$(CC) -o $(NAME_TESTS) $(SRC_PROJECT_FILES) $(OBJ_TESTS_FILES) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $(LDLIBS)
 	./$(NAME_TESTS) $(TESTS_FLAGS)
